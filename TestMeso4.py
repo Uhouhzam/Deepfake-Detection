@@ -19,6 +19,7 @@ parser.add_argument('model_root')
 parser.add_argument('result_root')
 parser.add_argument('--lr_pre', type=float, default=5e-3)
 
+#Define the ROC curve
 def plot_roc_curve(fper, tper):
     plt.plot(fper, tper, color='red', label='ROC')
     plt.plot([0, 1], [0, 1], color='green', linestyle='--')
@@ -31,6 +32,7 @@ def plot_roc_curve(fper, tper):
     plt.savefig(os.path.join(args.result_root, name))
     plt.clf()
 
+#Define the accuracy curve
 def plot_accuracy(Threshold,Acc):
     plt.plot(Threshold, Acc, color='red', label='ROC')
     plt.xlabel('Threshold')
@@ -129,23 +131,22 @@ def main(args):
             print("All", len(GenVal.labels), "predictions completed")
     
    
-    resultpd=pd.DataFrame({'predict_proba':predict, 'label':labels})
-    resultpd.to_csv(args.result_root+'AutrePredMeso4.csv', index=False)
-    print(resultpd)
+   
 
     if os.path.exists(args.result_root) is False:
         os.makedirs(args.result_root)
-    #resultSV=resultpd.to_csv(args.result_root/'result_predict')    
+    
+    resultpd=pd.DataFrame({'predict_proba':predict, 'label':labels})
+    resultpd.to_csv(args.result_root+'/'+'AutrePredMeso4.csv', index=False)
+    
+    #Compute FPR ,TPR and thresholds and draw the ROC curve
     FPR, TPR, thresholds = roc_curve(labels, predict)
-    TNR=np.ones(len(FPR))-FPR
     plot_roc_curve(FPR, TPR)
 
-    print(TNR)
-    print(TPR)
+    #Compute accuracy and draw the accuracy curve
+    TNR=np.ones(len(FPR))-FPR
     Acc=(TNR+TPR)/2
     plot_accuracy(thresholds,Acc)
- 
-
 
 
 if __name__ == '__main__':
